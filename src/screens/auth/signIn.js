@@ -9,8 +9,9 @@ import {Authcontext} from "../../../context";
 import {AntDesign} from "@expo/vector-icons";
 import * as yup from 'yup'
 import axios from "axios";
+import {connect} from "react-redux";
 
-export default function Login ({navigation}) {
+export  function Login (props) {
     const [buttonDisable, setButtonDisable] = useState(false)
     const ValidationSchema= yup.object({
         email: yup.string().test('is-valid-email', 'email non valide', (val)=>{
@@ -29,10 +30,10 @@ export default function Login ({navigation}) {
     })
     const {signIn} = React.useContext(Authcontext)
     React.useLayoutEffect(()=>{
-        navigation.setOptions({
+        props.navigation.setOptions({
             headerLeft: () => (
                 <TouchableOpacity
-                    onPress={()=> navigation.goBack()}
+                    onPress={()=> props.navigation.goBack()}
                 >
                     <AntDesign name="left" size={24} color="coral" style={{paddingLeft: 10}}/>
                 </TouchableOpacity>
@@ -41,60 +42,67 @@ export default function Login ({navigation}) {
     })
   return (
       <TouchableWithoutFeedback onPress={()=> Keyboard.dismiss()}>
-    <View style={globalStyles.container}>
-      <Text style={globalStyles.authText} >Connexion</Text>
-      <View style={globalStyles.container}>
-        <Formik
-            initialValues={{email: '', password: ''}}
-            validationSchema={ValidationSchema}
-            onSubmit={(values, actions )=> {
-                setButtonDisable(true)
-                axios.post('https://khadija-backen.herokuapp.com/user/login/', values).then(res =>{
-                    if (res.data){
-                        signIn()
-                    }else {
-                        ToastAndroid.showWithGravityAndOffset("Identifiants incorrects !",ToastAndroid.SHORT, ToastAndroid.BOTTOM,20,50)
-                        setButtonDisable(false)
-                    }
+          <View style={globalStyles.container}>
+          <Text style={globalStyles.authText} >Connexion</Text>
+          <View style={globalStyles.container}>
+            <Formik
+                initialValues={{email: '', password: ''}}
+                validationSchema={ValidationSchema}
+                onSubmit={(values, actions )=> {
+                    setButtonDisable(true)
+                    axios.post('https://khadija-backen.herokuapp.com/user/login/', values).then(res =>{
+                        if (res.data.status){
+                            props.updateUserInfo(res.data.user)
+                            signIn()
+                        }else {
+                            ToastAndroid.showWithGravityAndOffset("Identifiants incorrects !",ToastAndroid.SHORT, ToastAndroid.BOTTOM,20,50)
+                            setButtonDisable(false)
+                        }
 
-                })
+                    })
 
 
-        }} >
-          {(props)=>(
-              <View style={globalStyles.container}>
-                  <Text style={globalStyles.authLabelText}>Email</Text>
-                  <TextInput
-                      style={globalStyles.textInput}
-                      onChangeText={props.handleChange('email')}
-                      value={props.values.email}
-                      onBlur={props.handleBlur('email')}
-                  />
-                  <Text style={globalStyles.authErrors}>{props.touched.email && props.errors.email}</Text>
-                  <Text style={globalStyles.authLabelText}>Mot de passe</Text>
-                  <TextInput
-                      secureTextEntry={true}
-                      style={globalStyles.textInput}
-                      onChangeText={props.handleChange('password')}
-                      value={props.values.password}
-                      onBlur={props.handleBlur('password')}
-                  />
-                  <Text style={globalStyles.authErrors}>{props.touched.password && props.errors.password}</Text>
-                  <View style={globalStyles.forgotPasswordView}>
-                      <Text style={globalStyles.forgotPassword}>mot de passe oublié ?</Text>
-                  </View>
+            }} >
+              {(props)=>(
                   <View style={globalStyles.container}>
-                      <TouchableOpacity onPress={props.handleSubmit} disabled={buttonDisable}>
-                          <Text style={[globalStyles.welcomeButtonLogin, buttonDisable && globalStyles.welcomeButtonLoginDisable]}>Se connecter</Text>
-                      </TouchableOpacity>
+                      <Text style={globalStyles.authLabelText}>Email</Text>
+                      <TextInput
+                          style={globalStyles.textInput}
+                          onChangeText={props.handleChange('email')}
+                          value={props.values.email}
+                          onBlur={props.handleBlur('email')}
+                      />
+                      <Text style={globalStyles.authErrors}>{props.touched.email && props.errors.email}</Text>
+                      <Text style={globalStyles.authLabelText}>Mot de passe</Text>
+                      <TextInput
+                          secureTextEntry={true}
+                          style={globalStyles.textInput}
+                          onChangeText={props.handleChange('password')}
+                          value={props.values.password}
+                          onBlur={props.handleBlur('password')}
+                      />
+                      <Text style={globalStyles.authErrors}>{props.touched.password && props.errors.password}</Text>
+                      <View style={globalStyles.forgotPasswordView}>
+                          <Text style={globalStyles.forgotPassword}>mot de passe oublié ?</Text>
+                      </View>
+                      <View style={globalStyles.container}>
+                          <TouchableOpacity onPress={props.handleSubmit} disabled={buttonDisable}>
+                              <Text style={[globalStyles.welcomeButtonLogin, buttonDisable && globalStyles.welcomeButtonLoginDisable]}>Se connecter</Text>
+                          </TouchableOpacity>
+                      </View>
+
                   </View>
+              )}
 
-              </View>
-          )}
-
-        </Formik>
-      </View>
-    </View>
+            </Formik>
+          </View>
+        </View>
       </TouchableWithoutFeedback>
   );
 }
+const mapStateToProps = state => state
+const mapDispatchToProps = dispatch => ({
+    updateUserInfo: userinfo =>dispatch({type : "USER_LOGIN", value: userinfo})
+})
+const connectComponent = connect(mapStateToProps, mapDispatchToProps)
+export default connectComponent(Login)

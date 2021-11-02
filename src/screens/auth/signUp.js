@@ -8,8 +8,20 @@ import {Formik} from "formik";
 import {Authcontext} from "../../../context";
 import * as yup from "yup";
 import axios from "axios";
+import {AntDesign} from "@expo/vector-icons";
 
-export default function Register ({navigation}) {
+export default function Register (props) {
+    React.useLayoutEffect(()=>{
+        props.navigation.setOptions({
+            headerLeft: () => (
+                <TouchableOpacity
+                    onPress={()=> props.navigation.goBack()}
+                >
+                    <AntDesign name="left" size={24} color="coral" style={{paddingLeft: 10}}/>
+                </TouchableOpacity>
+            ),
+        })
+    })
     const {signUp} = React.useContext(Authcontext)
     const [buttonDisable, setButtonDisable] = useState(false)
     const ValidationSchema= yup.object({
@@ -30,7 +42,7 @@ export default function Register ({navigation}) {
         name: yup.string()
             .test('is-min-2', 'entrer un nom valide (3 caractéres au moins)', (val) => {
                 if (val){
-                    return val.length >0 && val.length > 3
+                    return val.length >0 && val.length >= 3
                 }
 
         })
@@ -43,9 +55,7 @@ export default function Register ({navigation}) {
           <Formik initialValues={{email: '', password: '', name: ''}} validationSchema={ValidationSchema} onSubmit={(values, actions )=> {
              setButtonDisable(true)
               axios.post("https://khadija-backen.herokuapp.com/user/register/",values).then(res => {
-                 console.log(res.data)
-                 actions.resetForm()
-                 signUp()
+                 props.navigation.navigate('Login')
              })
 
           }} >

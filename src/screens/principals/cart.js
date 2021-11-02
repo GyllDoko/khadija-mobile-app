@@ -1,24 +1,43 @@
-import React, {useState} from "react"
+import React, {useEffect, useState} from "react"
 import {Image, Text, View, StyleSheet, TouchableOpacity, FlatList} from "react-native";
 import {globalStyles} from "../../styles/global";
 import {AntDesign} from "@expo/vector-icons";
+import {connect} from "react-redux";
+import CartCard from  '../../components/cartCart'
+import axios from "axios";
 
-const CartElements = [
-    {
-        name: 1
-    },
-    {
-        name: 1
-    },
-]
-const Cart = ({navigation})=>{
+const Cart = (props)=>{
+    const [cartTab, setCartTab] =useState([])
+    let totPrice = 0.0
+    for (let i of cartTab){
+        totPrice += parseFloat(i.price) * i.quantity
+    }
+   useEffect(()=>{
+       setCartTab(props.cart)
+   },[props.cart])
+    const getQuantity = (val) => {
+      const indexOfProd = props.cart.findIndex(product => product.id === val.id)
+        return props.cart[indexOfProd].quantity
+    }
+    const sendOrder = () => {
+        let data = {
+            products : props.cart,
+            total_price  : totPrice.toFixed(2),
+            user: props.userInfo,
+        }
+        axios.post("order/save_order/", data).then(res => {
+            console.log(res.data)
+        })
+    }
+
     return <View style={globalStyles.container}>
         <View style={{flex: 4}}>
             <FlatList
-                data={CartElements}
+                data={cartTab}
+                // extraData={props.cart}
                 keyExtractor={(_, i)=> i}
-                renderItem={()=>(
-                    <CartCard  />
+                renderItem={({item})=>(
+                    <CartCard  item={item} quantity={getQuantity(item)} />
                 )}
             />
         </View>
@@ -26,9 +45,9 @@ const Cart = ({navigation})=>{
             <View style={{backgroundColor: "#ccc", height: 1, marginHorizontal: 10}}></View>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent:'space-between', marginHorizontal: 10, marginVertical: 10}}>
                 <Text>Total :</Text>
-                <Text style={{fontFamily: "MontserratBold", fontSize: 25}}>5.50 €</Text>
+                <Text style={{fontFamily: "MontserratBold", fontSize: 25}}>{totPrice.toFixed(2)} €</Text>
             </View>
-            <TouchableOpacity onPress={() => {}}>
+            <TouchableOpacity onPress={() => sendOrder()}>
                 <Text style={globalStyles.welcomeButtonLogin}>Valider</Text>
             </TouchableOpacity>
         </View>
@@ -36,59 +55,11 @@ const Cart = ({navigation})=>{
 
     </View>
 }
-export default Cart
-
-const CartCard = ()=>{
-    const [itemCount, setItemCount] = useState(1)
-    return <View style={styles.cardView}>
-        <Image style={styles.image} source={{
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/0/04/Pound_layer_cake.jpg'  }}/>
-        <View style={styles.description}>
-            <Text style={styles.name}>Mini Pastilla poulet</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-                <Text style={{fontSize: 24, }}>2.5 €</Text>
-                <View style={{flexDirection: 'row', borderWidth: 1, borderColor:"coral",borderRadius: 8, alignItems: 'center'}}>
-                    <TouchableOpacity onPress={()=> setItemCount(itemCount -1)}>
-                        <AntDesign name="minus" size={15} color="black" style={{paddingHorizontal: 5}}/>
-                    </TouchableOpacity>
-                    <Text style={{marginHorizontal: 5, fontSize: 24}}>{itemCount}</Text>
-                    <TouchableOpacity onPress={()=> setItemCount(itemCount +1)}>
-                        <AntDesign name="plus" size={15} color="black" style={{paddingHorizontal: 5}} />
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-        </View>
-    </View>
-}
-
-
-const styles = StyleSheet.create({
-    image:{
-        flex: 2,
-        width: null,
-        height: null,
-        resizeMode: 'cover',
-        borderTopLeftRadius: 8,
-        borderBottomLeftRadius: 10,
-
-    },
-    description: {
-        flex:3,
-        padding: 10,
-        justifyContent: "space-between"
-    },
-    cardView: {
-        marginBottom: 10,
-        height: 100,
-        flexDirection: 'row',
-        marginHorizontal: 10,
-        borderRadius:10,
-        borderColor: "#ccc",
-        borderWidth: 1,
-    },
-    name: {
-        fontSize: 20,
-        fontFamily: "MontserratRegular",
+const mapStateToProps = state => {
+    return {
+        cart: state.cart,
+        userInfo: state.userInfo,
     }
-})
+}
+export default connect(mapStateToProps)(Cart)
+

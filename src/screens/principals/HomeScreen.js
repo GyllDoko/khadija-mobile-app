@@ -3,11 +3,15 @@ import {View, Text, Image, TouchableOpacity, ScrollView, FlatList} from 'react-n
 import { globalStyles } from '../../styles/global'
 import Card from "../../components/Card";
 import axios from "axios";
+import {connect} from "react-redux";
 
-const HomeScreen = ({navigation}) => {
+
+
+const HomeScreen = (props) => {
     const [categories, setCategories] = useState([])
     const [initialCategory, setInitialCategory  ]= useState('Pastilla')
     const [products, setProduct] = useState([])
+
    useEffect(()=>{
        axios.get("product/categories/").then(res => {
            setCategories(res.data)
@@ -37,12 +41,13 @@ const HomeScreen = ({navigation}) => {
            keyExtractor={(item, index)=> index}
             data={products}
             renderItem={({item})=>(
-                <Card image={item.default_image} item={item} name={item.name} price={item.price} navigation={navigation}/>
+                <Card image={item.default_image} item={item} name={item.name} price={item.price} navigation={props.navigation}/>
             ) }
        />
 
        </View>
     )
 }
-
-export default HomeScreen
+const mapStateToProps = state => state
+const connectComponent = connect(mapStateToProps)
+export default connectComponent(HomeScreen)

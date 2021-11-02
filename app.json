@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "restaurantApp",
+    "name": "Restaurant App",
     "slug": "restaurantApp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,11 +17,12 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gyll.restaurant"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.gyll.restaurant"

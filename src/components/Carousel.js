@@ -16,6 +16,7 @@ import BottomSheet from "react-native-gesture-bottom-sheet";
 import {AntDesign} from "@expo/vector-icons";
 import {globalStyles} from "../styles/global";
 import axios from "axios";
+import {connect} from "react-redux";
 const {width, height} = Dimensions.get('window');
 
 const ITEM_WIDTH = width;
@@ -40,7 +41,7 @@ const product = {
     price: '25.000 FCFA'
 }
 
-const MyCarousel = ({navigation, item}) => {
+const MyCarousel = (props) => {
     const [itemCount, setItemCount] = useState(1)
     const [images, setImages] = useState([])
     const [imagesLoad, setImagesLoad] = useState(false)
@@ -48,16 +49,36 @@ const MyCarousel = ({navigation, item}) => {
     const bottomSheet = useRef();
     const  scrollY = React.useRef(new Animated.Value(0)).current
     useEffect(()=>{
-        axios.get("product/descriptions/"+item.name).then(res =>{
+        axios.get("product/descriptions/"+props.item.name).then(res =>{
             setDescriptions(res.data)
         })
         if (imagesLoad == false){
-            axios.get("product/images/"+item.name).then(res =>{
+            axios.get("product/images/"+props.item.name).then(res =>{
                 setImages(res.data)
             })
             setImagesLoad(true)
         }
     },[])
+    const decrement =()=>{
+        if(itemCount > 1){
+            setItemCount(itemCount -1)
+        }
+    }
+    const increment = ()=>{
+        setItemCount(itemCount + 1)
+    }
+    const addProductToCard = ()=>{
+        let val = {
+            ...props.item,
+            quantity: itemCount
+        }
+        let action = {
+            type: "UPDATE_CART",
+            value: val,
+        }
+        props.dispatch(action)
+        props.navigation.navigate("Home")
+    }
     return (
         <View >
             <View style={{height: ITEM_HEIGHT, overflow: 'hidden' }}>
@@ -97,29 +118,25 @@ const MyCarousel = ({navigation, item}) => {
                 <View
                     contentContainerStyle={{ justifyContent: "center"}}
                     scrollEventThrottle={1}
-                    // onScroll={Animated.event(
-                    //     [{nativeEvent: {contentOffset: {y: scrollY}}}],
-                    //     { useNativeDriver: true } // Add this line
-                    //  )}
                 >
-                    <Text style={{fontFamily: "MontserratBold", fontSize:20, textAlign: "center", marginTop: 20}}>{item.name}</Text>
+                    <Text style={{fontFamily: "MontserratBold", fontSize:20, textAlign: "center", marginTop: 20}}>{props.item.name}</Text>
                     <View style={{flexDirection: 'row', justifyContent: "space-around", alignItems:"center"}} >
                         <View style={{flexDirection: 'row', borderWidth: 1, borderColor:"#ccc", padding: 3,borderRadius: 8, alignItems: 'center'}}>
-                            <TouchableOpacity onPress={()=> setItemCount(itemCount -1)}>
+                            <TouchableOpacity onPress={()=> decrement()}>
                                 <AntDesign name="minus" size={24} color="coral" style={{paddingRight: 5}}/>
                             </TouchableOpacity>
                             <Text style={{marginHorizontal: 5, fontSize: 24}}>{itemCount}</Text>
-                            <TouchableOpacity onPress={()=> setItemCount(itemCount +1)}>
+                            <TouchableOpacity onPress={()=> increment()}>
                                 <AntDesign name="plus" size={24} color="coral" style={{paddingLeft: 5}} />
                             </TouchableOpacity>
                         </View>
-                        <Text style={{margin: 20, fontSize: 20}}>{item.price}</Text>
+                        <Text style={{margin: 20, fontSize: 20}}>{props.item.price}</Text>
                     </View>
 
                     {descriptions.map((item, index)=>(
-                        <Text style={{marginHorizontal: 20, fontFamily: "MontserratRegular", paddingVertical: 5}} key={index}>{item.name}: {item.value}</Text>
+                        <Text style={{marginHorizontal: 20, fontFamily: "MontserratRegular", paddingVertical: 5}} key={index}>{props.item.name}: {props.item.value}</Text>
                     ))}
-                    <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+                    <TouchableOpacity onPress={() => addProductToCard()}>
                         <Text style={globalStyles.welcomeButtonLogin}>Ajouter au panier</Text>
                     </TouchableOpacity>
 
@@ -137,7 +154,8 @@ const MyCarousel = ({navigation, item}) => {
     </View>
     )
 }
-export default MyCarousel
+const mapStateToProps = state => state
+export default connect(mapStateToProps)(MyCarousel)
 const styles = StyleSheet.create({
     image: {
         width: ITEM_WIDTH,

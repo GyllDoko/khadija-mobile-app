@@ -1,7 +1,15 @@
 import React from "react";
 import {View, StyleSheet, TouchableOpacity, Image, Text} from "react-native";
 import { AntDesign } from '@expo/vector-icons';
+import {connect} from "react-redux";
 const Card=(props)=>{
+    const addProductToCard = (val)=>{
+        let action = {
+            type: "UPDATE_CART",
+            value: val,
+        }
+        props.dispatch(action)
+    }
     return (
         <TouchableOpacity style={styles.container} onPress={()=> props.navigation.push("Details", {data: props.item})}>
             <Image style={styles.imageStyle} source={{
@@ -13,7 +21,7 @@ const Card=(props)=>{
                 <Text style={styles.name} >{props.name}</Text>
                 <View style={styles.price}>
                     <Text style={{fontFamily: "MontserratRegular", fontSize: 28}} >{props.price} €</Text>
-                    <TouchableOpacity onPress={()=>{}}>
+                    <TouchableOpacity onPress={()=> addProductToCard(props.item)}>
                         <AntDesign name="pluscircle" size={44} color="coral" />
                     </TouchableOpacity>
 
@@ -24,7 +32,9 @@ const Card=(props)=>{
         </TouchableOpacity>
     )
 }
-export default Card
+const mapStateToProps= state =>state
+export default connect(mapStateToProps)(Card)
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,

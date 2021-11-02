@@ -7,6 +7,12 @@ export const globalStyles = StyleSheet.create({
     paddingTop: 30,
     backgroundColor: "#fff",
   },
+    row:{
+      flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: "space-between",
+        marginHorizontal: 20,
+    },
     onboardSkipButton: {
         padding: 10,
         color: 'black',
@@ -138,5 +144,11 @@ export const globalStyles = StyleSheet.create({
         borderColor: "coral",
         borderWidth: 2,
 
+    },
+    separator :{
+      marginVertical: 15,
+        marginHorizontal: 20,
+        borderWidth: 0.3,
+        borderColor: "#ccc"
     }
 })

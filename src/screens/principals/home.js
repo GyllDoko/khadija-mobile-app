@@ -1,9 +1,16 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import { View, Text, Image, TouchableOpacity } from 'react-native'
 import { globalStyles } from '../../styles/global'
+import {connect} from "react-redux";
 
 
-const Home = ({ navigation }) => {
+const Home = (props) => {
+    useEffect(()=>{
+        if (props.userInfo){
+            console.log(props)
+        }
+    },[])
+
     return (
         <View style={globalStyles.container}>
             <Image
@@ -16,10 +23,10 @@ const Home = ({ navigation }) => {
                     <Text style={globalStyles.welcomeText}>Délices de Lalla Khadija</Text>
                 </View>
                 <View style={{ marginTop: 30 }}>
-                    <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                    <TouchableOpacity onPress={() => props.navigation.navigate("Login")}>
                         <Text style={globalStyles.welcomeButtonLogin}>Se connecter</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+                    <TouchableOpacity onPress={() => props.navigation.navigate("Register")}>
                         <Text style={globalStyles.welcomeButtonRegister}>S'inscrire</Text>
                     </TouchableOpacity>
                 </View>
@@ -28,5 +35,5 @@ const Home = ({ navigation }) => {
         </View>
     )
 }
-
-export default Home
+const mapStateToProps = state => state
+export default connect(mapStateToProps)(Home)
